@@ -13,10 +13,6 @@ from msccl.language.rank_dag import *
 import msccl.collectives as collectives
 import logging
 # from msccl.language.visualize import *
-logger = logging.getLogger(__name__)
-
-# Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
 _current_program = None
