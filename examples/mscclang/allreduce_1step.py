@@ -12,7 +12,7 @@ def allreduce_allpairs(gpus, instances, protocol):
 
     # Configure logging
     logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-    logger.info(f"Starting allreduce with size={size}, instances={instances}, protocol={protocol}")
+    logger.info(f"Starting allreduce with size={gpus}, instances={instances}, protocol={protocol}")
     size = gpus
     chunksperloop = gpus
     topology = fully_connected(size)
