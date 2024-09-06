@@ -152,9 +152,9 @@ def chunk(rank, buffer, index, size=1):
 def create_scratch(rank, name):
     return _curr().create_scratch(rank, name)
 
-def XML():
+def XML(pippo):
    logger.debug("starting xml logging")
-   print("logger")
+   print(pippo)
    print(_curr().generate_xml())
 
 def Check():
