@@ -14,11 +14,12 @@ def allreduce(size, instances, protocol):
     collective = AllReduce(size, logical_chunk, True)
     with MSCCLProgram("allreduce_swing_latency_optimal", topology, collective, instances, protocol):
         def pi(r, s, n):
-            # Use a similar peer-determination logic as in the Python version
+            p = (1 - math.pow(-2, s+1))/3
             if r % 2 == 0:
-                return (r + (1 - math.pow(-2, s + 1)) / 3) % n
-            else:
-                return (r - (1 - math.pow(-2, s + 1)) / 3) % n
+                peer = (r + p)%n
+            else :
+                peer = (r - p)%n
+            return peer
             
         for step in range(int(math.log2(size))):
             for r in range(size):
