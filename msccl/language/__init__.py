@@ -154,6 +154,7 @@ def create_scratch(rank, name):
 
 def XML():
    logger.debug("starting xml logging")
+   print("logger")
    print(_curr().generate_xml())
 
 def Check():
