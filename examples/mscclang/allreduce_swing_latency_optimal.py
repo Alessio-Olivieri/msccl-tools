@@ -23,7 +23,7 @@ def allreduce(size, instances, protocol):
         for step in range(int(math.log2(size))):
             for r in range(size):
                 
-                peer = pi(r, step, step)
+                peer = pi(r, step, size)
                 c = chunk(r, Buffer.input, 0)  # Access the full buffer
                 c_peer = c.copy(peer, Buffer.output, 0)  # Send to the peer
                 c_out = c_peer.reduce(chunk(peer, Buffer.input, 0))  # Reduce with local buffer

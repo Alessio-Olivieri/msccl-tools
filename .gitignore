@@ -131,3 +131,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+setup_leonardo.sh
