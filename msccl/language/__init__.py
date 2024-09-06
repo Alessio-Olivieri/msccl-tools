@@ -10,8 +10,6 @@ from msccl.language.rank_dag import *
 import msccl.collectives as collectives
 
 # Configure logging
-logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
-
 _current_program = None
 
 def _curr():
