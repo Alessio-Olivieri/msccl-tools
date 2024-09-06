@@ -23,11 +23,16 @@ def allreduce(size, instances, protocol):
             
         for step in range(int(math.log2(size))):
             for r in range(size):
-                
+                # Each rank sends its buffer
                 peer = pi(r, step, size)
-                c = chunk(r, Buffer.input, 0)  # Access the full buffer
-                c_peer = c.copy(peer, Buffer.output, 0)  # Send to the peer
-                c_out = c_peer.reduce(chunk(peer, Buffer.input, 0))  # Reduce with local buffer
+                c = chunk(r, Buffer.input, 0)
+                c.copy(peer, Buffer.output, 0)
+
+            for r in range(size):
+                # Each rank reduces its buffer with the received buffer
+                received_chunk = chunk(r, Buffer.output, 0)
+                input_chunk = chunk(r, Buffer.input, 0)
+                received_chunk.reduce(input_chunk)
 
 
         XML()
