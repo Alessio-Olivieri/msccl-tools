@@ -42,7 +42,7 @@ def allreduce(size, instances, protocol):
                 logger.debug(f"Rank {r} reduced chunk at step {step}")
 
         logger.info("Allreduce completed, generating XML")
-        XML("gendarmeria")
+        XML()
         Check()
 
 
