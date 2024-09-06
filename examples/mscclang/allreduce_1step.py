@@ -5,13 +5,8 @@ import argparse
 from msccl.language import *
 from msccl.topologies import *
 from msccl.language.collectives import AllReduce
-import logging
 
 def allreduce_allpairs(gpus, instances, protocol):
-    logger = logging.getLogger(__name__)
-
-    # Configure logging
-    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
     logger.info(f"Starting allreduce with size={gpus}, instances={instances}, protocol={protocol}")
     size = gpus
     chunksperloop = gpus

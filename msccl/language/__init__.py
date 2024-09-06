@@ -15,6 +15,9 @@ import logging
 # from msccl.language.visualize import *
 logger = logging.getLogger(__name__)
 
+# Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 _current_program = None
 def _curr():
@@ -153,7 +156,9 @@ def create_scratch(rank, name):
     return _curr().create_scratch(rank, name)
 
 def XML():
-   print(_curr().generate_xml())
+    print("ciaooooooooo")
+    logger.debug("cioa")
+    print(_curr().generate_xml())
 
 def Check():
     return _curr().check()
