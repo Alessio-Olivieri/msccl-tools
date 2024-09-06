@@ -11,6 +11,7 @@ from msccl.language.chunk import *
 from msccl.language.buffer import *
 from msccl.language.rank_dag import *
 import msccl.collectives as collectives
+import logging
 # from msccl.language.visualize import *
 
 _current_program = None
@@ -150,6 +151,7 @@ def create_scratch(rank, name):
     return _curr().create_scratch(rank, name)
 
 def XML():
+   logging.debug("starting xml logging")
    print(_curr().generate_xml())
 
 def Check():
