@@ -8,19 +8,22 @@ from msccl.language import *
 from msccl.topologies import *
 from msccl.language.collectives import AllReduce
 
+def p(s):
+    # This calculates p(s) = sum((-2)^i for i in range(s+1))
+    return sum([(-2)**i for i in range(s+1)])
+
+def pi(r, s, n):
+    if r % 2 == 0:
+        peer = (r + p(s)) % n
+    else:
+        peer = (r - p(s)) % n
+    return int(peer)
+
 def allreduce(size, instances, protocol):
     topology = fully_connected(size)
     logical_chunk = size
     collective = AllReduce(size, logical_chunk, True)
     with MSCCLProgram("allreduce_swing_latency_optimal", topology, collective, instances, protocol):
-        def pi(r, s, n):
-            p = (1 - math.pow(-2, s+1))/3
-            if r % 2 == 0:
-                peer = (r + p)%n
-            else :
-                peer = (r - p)%n
-            return int(peer)
-            
         for step in range(int(math.log2(size))):
             for r in range(size):
                 # Each rank sends its buffer

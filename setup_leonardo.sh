@@ -45,3 +45,9 @@ export MSCCL_XML_FILES=test.xml
 export NCCL_ALGO=MSCCL,RING,TREE
 
 #python msccl-tools/examples/mscclang/allreduce_a100_allpairs.py --protocol=LL 8 2 > test.xml
+
+python allreduce_swing_latency_optimal.py 4 1 "LL" > swing_latency.xml
+
+
+# To copy a file from
+scp aolivie1@login.leonardo.cineca.it:/leonardo/home/userexternal/aolivie1/msccl-tools-swing/examples/mscclang/swing_latency.xml .
