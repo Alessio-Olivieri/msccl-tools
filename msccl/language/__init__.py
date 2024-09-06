@@ -10,6 +10,8 @@ from msccl.language.rank_dag import *
 import msccl.collectives as collectives
 
 # Configure logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
+
 _current_program = None
 
 def _curr():
@@ -174,6 +176,20 @@ class Ref(ChunkRef):
         return self
 
 
+    def get_origin_index(self, index=0):
+        return self._get_chunk(index + self.index).origin_index
+
+    def get_origin_rank(self, index=0):
+        return self._get_chunk(index + self.index).origin_rank
+
+    def get_dst_index(self, index=0):
+        return self._get_chunk(index + self.index).dst_index
+
+    def get_dst_rank(self, index=0):
+        return self._get_chunk(index + self.index).dst_rank
+
+    def print_chunk_info(self, index=0):
+        print(self._get_chunk(index + self.index)) 
 
 
 # @dataclass
