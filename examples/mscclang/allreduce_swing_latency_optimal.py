@@ -19,7 +19,7 @@ def allreduce(size, instances, protocol):
                 peer = (r + p)%n
             else :
                 peer = (r - p)%n
-            return peer
+            return int(peer)
             
         for step in range(int(math.log2(size))):
             for r in range(size):
