@@ -13,6 +13,8 @@ from msccl.language.rank_dag import *
 import msccl.collectives as collectives
 import logging
 # from msccl.language.visualize import *
+logger = logging.getLogger(__name__)
+
 
 _current_program = None
 def _curr():
@@ -151,7 +153,7 @@ def create_scratch(rank, name):
     return _curr().create_scratch(rank, name)
 
 def XML():
-   logging.debug("starting xml logging")
+   logger.debug("starting xml logging")
    print(_curr().generate_xml())
 
 def Check():
