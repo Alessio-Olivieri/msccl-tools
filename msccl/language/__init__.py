@@ -158,7 +158,7 @@ def create_scratch(rank, name):
 def XML():
     print("ciaooooooooo")
     logger.debug("cioa")
-    _curr().generate_xml()
+    print(_curr().generate_xml())
 
 def Check():
     return _curr().check()
