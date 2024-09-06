@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def allreduce(size, instances, protocol):
+    logger = logging.getLogger(__name__)
+
+# Configure logging
+    logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
     logger.info(f"Starting allreduce with size={size}, instances={instances}, protocol={protocol}")
     topology = fully_connected(size)
     logical_chunk = size
