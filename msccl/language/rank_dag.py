@@ -8,6 +8,9 @@ import functools
 
 from msccl.language.ir import *
 from msccl.language.passes import *
+import logging
+
+logger = logging.getLogger(__name__)
 
 def remove_op(op):
     for p in op.prev:
@@ -227,9 +230,12 @@ class InstructionDAG:
     # rrc(src, sbuf, si, ...) send(_, _, _, dst, dbuf, di)
     def _optimize_rrcs_rrs(self):
         # RRC/S -> RRS
+        logger.debug("_optimize_rrcs_rrs")
         for slot, ops in self.operations.items():
             frontier = [ops]
+            logger.debug(f"frontier: {frontier}")
             while len(frontier) > 0:
+                logger.debug(f"frontier length: {len(frontier)}")
                 op = frontier[0]
                 if len(op.next) == 1:
                     next_op = op.next[0]
