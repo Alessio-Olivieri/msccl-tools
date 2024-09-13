@@ -19,7 +19,7 @@ def send_whole_buffer(source_rank, dest_rank):
     chunk_index = 0
     
     print(f"Starting to send buffer '{Buffer.input}' from rank {source_rank} to rank {dest_rank}")
-    c = chunk(source_rank, Buffer.input, 0, 4).copy(dest_rank, Buffer.output, 0)
+    c = chunk(source_rank, Buffer.input, 0, 4).copy(dest_rank, Buffer.input, 0)
     
 
 def allreduce_swing(size, instances):
