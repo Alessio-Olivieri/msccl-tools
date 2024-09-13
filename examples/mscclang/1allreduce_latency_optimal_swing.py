@@ -19,27 +19,8 @@ def send_whole_buffer(source_rank, dest_rank):
     chunk_index = 0
     
     print(f"Starting to send buffer '{Buffer.input}' from rank {source_rank} to rank {dest_rank}")
+    c = chunk(source_rank, Buffer.input, 0, 4).copy(dest_rank, "scratch", 0)
     
-    # Dynamically figure out the number of chunks
-    while True:
-        try:
-            print(f"chunking: chunk({source_rank}, {src_buffer}, {chunk_index})")                        
-            # Access each chunk and copy it
-            c = chunk(source_rank, src_buffer, chunk_index, 4)
-
-            print(f"copy({dest_rank}, {src_buffer}, chunk_index)")
-            t = c.copy(dest_rank, src_buffer, chunk_index)
-            
-            # Log after chunk is successfully copied
-            print(f"Successfully copied chunk {chunk_index}")
-            
-            chunk_index += 1
-        except Exception as error:
-            # Log when no more chunks are available (i.e., when the loop breaks)
-            print(f"and error occurred: {error}")
-            print(f"No more chunks to copy. Finished sending buffer '{Buffer.input}' after {chunk_index} chunks.")
-            break
-
 
 def allreduce_swing(size, instances):
     # Logical topology
@@ -57,6 +38,13 @@ def allreduce_swing(size, instances):
         
         # for step in range(int(math.log2(size))):
         #     logger.debug(f"Starting step {step}")
+        #     for r in range(size):
+        #         peer = pi(r, step, size)
+        #         chunk(r, Buffer.input, 0, size).copy(peer, "scratch", 0)
+
+    
+        
+        
 
         #     # Each rank sends the nth chunk to the nth rank into scratch space
         #     for r1 in range(size):
