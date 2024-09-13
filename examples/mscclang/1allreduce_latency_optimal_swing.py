@@ -25,7 +25,7 @@ def send_whole_buffer(source_rank, dest_rank):
         try:
             print(f"chunking: chunk({source_rank}, {src_buffer}, {chunk_index})")                        
             # Access each chunk and copy it
-            c = chunk(source_rank, src_buffer, chunk_index)
+            c = chunk(source_rank, src_buffer, chunk_index, 4)
 
             print(f"copy({dest_rank}, {src_buffer}, chunk_index)")
             t = c.copy(dest_rank, src_buffer, chunk_index)
