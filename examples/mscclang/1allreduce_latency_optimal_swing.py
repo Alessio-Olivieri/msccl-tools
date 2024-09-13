@@ -35,13 +35,15 @@ def allreduce_swing(size, instances):
             logger.debug(f"pi calculation for rank {r}, step {s}, size {n}: peer={peer}")
             return int(peer)
         
-        send_whole_buffer(0,1)
+        # send_whole_buffer(0,1)
         
-        # for step in range(int(math.log2(size))):
-        #     logger.debug(f"Starting step {step}")
-        #     for r in range(size):
-        #         peer = pi(r, step, size)
-        #         chunk(r, Buffer.input, 0, size).copy(peer, "scratch", 0)
+        for step in range(int(math.log2(size))):
+            logger.debug(f"Starting step {step}")
+            for r in range(size):
+                peer = pi(r, step, size)
+                c_source = chunk(r, Buffer.input, 0, size)
+                c_dest = chunk(peer, Buffer.input, 0, size)
+                c_dest.reduce(c_source)
 
     
         
