@@ -43,7 +43,7 @@ def allreduce_swing(size, instances):
                 peer = pi(r, step, size)
                 logger.debug(f"copying buffer of {r} into scratch of {peer}")
                 c = chunk(r, Buffer.input, index=0, size=size)
-                c.copy(peer, 'scratch', 0)
+                c.copy(peer, 'scratch', 0, recvtb=peer, sendtb=r)
 
             for rank in range(size):
                 logger.debug(f"reducing scratch buffer of {rank} into input buffer")
