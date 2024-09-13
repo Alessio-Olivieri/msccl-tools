@@ -43,6 +43,7 @@ def allreduce_swing(size, instances):
                 peer = pi(r, step, size)
                 c_source = chunk(r, Buffer.input, 0, size)
                 c_dest = chunk(peer, Buffer.input, 0, size)
+                logger.debug(f"reducing buffer of {c_source} with buffer of {c_dest}")
                 c_dest.reduce(c_source)
 
     
