@@ -66,8 +66,8 @@ def allreduce_swing(size, instances):
         #                 c = chunk(r1, Buffer.input, index, size=size)
         #                 c.copy(r2, 'scratch', sendtb=r2, recvtb=r1)
 
-        # Check()
-        # XML()
+        Check()
+        XML()
 
 parser = argparse.ArgumentParser()
 parser.add_argument('num_gpus', type=int, help ='number of gpus')
