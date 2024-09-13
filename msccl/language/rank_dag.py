@@ -10,7 +10,7 @@ from msccl.language.ir import *
 from msccl.language.passes import *
 import logging
 
-logger = logging.getLogger(__name__)
+#logger = logging.getLogger(__name__)
 
 def remove_op(op):
     for p in op.prev:
@@ -158,41 +158,41 @@ class InstructionDAG:
 
     def convert_set_list(self):
         ops = []
-        logger.debug("Initialized empty ops list")
+        #logger.debug("Initialized empty ops list")
 
         for slot, op in self.operations.items():
-            logger.debug(f"Processing operation in slot {slot}: {op}")
+            #logger.debug(f"Processing operation in slot {slot}: {op}")
             
             if op.inst == Instruction.start:
-                logger.info(f"Operation {op} is a start instruction.")
+                #logger.info(f"Operation {op} is a start instruction.")
                 op.next = list(op.next)
-                logger.debug(f"Converted op.next to list: {op.next}")
+                #logger.debug(f"Converted op.next to list: {op.next}")
                 for o in op.next:
-                    logger.debug(f"Appending to ops: {o}")
+                    #logger.debug(f"Appending to ops: {o}")
                     ops.append(o)
             elif op.inst != Instruction.copy:
-                logger.debug(f"Appending non-copy operation: {op}")
+                #logger.debug(f"Appending non-copy operation: {op}")
                 ops.append(op)
 
         visited = set()
-        logger.debug("Initialized empty visited set")
+        #logger.debug("Initialized empty visited set")
 
         while len(ops) > 0:
             op = ops[0]
-            logger.debug(f"Processing op: {op}")
+            #logger.debug(f"Processing op: {op}")
 
             if op not in visited:
-                logger.info(f"Visiting new operation: {op}")
+                #logger.info(f"Visiting new operation: {op}")
                 visited.add(op)
                 op.next = list(op.next)
-                logger.debug(f"Converted op.next to list: {op.next}")
+                #logger.debug(f"Converted op.next to list: {op.next}")
                 ops = ops[1:] + op.next
-                logger.debug(f"Updated ops list: {ops}")
+                #logger.debug(f"Updated ops list: {ops}")
             else:
-                logger.debug(f"Operation already visited: {op}")
+                #logger.debug(f"Operation already visited: {op}")
                 ops = ops[1:]
 
-        logger.debug("Finished processing operations")
+        #logger.debug("Finished processing operations")
                     
     def optimize(self):
         self._optimize_rrcs_rrs()
@@ -248,10 +248,10 @@ class InstructionDAG:
     # rrc(src, sbuf, si, ...) send(_, _, _, dst, dbuf, di)
     def _optimize_rrcs_rrs(self):
         # RRC/S -> RRS
-        logger.debug("_optimize_rrcs_rrs")
+        #logger.debug("_optimize_rrcs_rrs")
         for slot, ops in self.operations.items():
             frontier = [ops]
-            logger.debug(f"frontier: {frontier}")
+            #logger.debug(f"frontier: {frontier}")
             while len(frontier) > 0:
                 op = frontier[0]
                 if len(op.next) == 1:
