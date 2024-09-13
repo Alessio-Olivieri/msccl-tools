@@ -34,8 +34,9 @@ def send_whole_buffer(source_rank, dest_rank):
             print(f"Successfully copied chunk {chunk_index}")
             
             chunk_index += 1
-        except:
+        except Exception as error:
             # Log when no more chunks are available (i.e., when the loop breaks)
+            print(f"and error occurred: {error}")
             print(f"No more chunks to copy. Finished sending buffer '{Buffer.input}' after {chunk_index} chunks.")
             break
 
