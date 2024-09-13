@@ -11,29 +11,33 @@ import logging
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def send_whole_buffer(source_rank, dest_rank, buffer_name='input'):
+def send_whole_buffer(source_rank, dest_rank):
     # Reference the source buffer (input buffer in this case)
-    src_buffer = buffer_name
+    src_buffer = Buffer.input
 
     # Initialize the chunk index
     chunk_index = 0
     
-    print(f"Starting to send buffer '{buffer_name}' from rank {source_rank} to rank {dest_rank}")
+    print(f"Starting to send buffer '{Buffer.input}' from rank {source_rank} to rank {dest_rank}")
     
     # Dynamically figure out the number of chunks
-    print(f"chunking: chunk({source_rank}, {src_buffer}, {chunk_index})")                        
-    # Access each chunk and copy it
-    c = chunk(source_rank, src_buffer, chunk_index)
+    while True:
+        try:
+            print(f"chunking: chunk({source_rank}, {src_buffer}, {chunk_index})")                        
+            # Access each chunk and copy it
+            c = chunk(source_rank, src_buffer, chunk_index)
 
-    print(f"copy({dest_rank}, {src_buffer}, {chunk_index})")
-    t = c.copy(dest_rank, src_buffer, chunk_index)
-    
-    # Log after chunk is successfully copied
-    print(f"Successfully copied chunk {chunk_index}")
-    
-    chunk_index += 1
-    # Log when no more chunks are available (i.e., when the loop breaks)
-    print(f"No more chunks to copy. Finished sending buffer '{buffer_name}' after {chunk_index} chunks.")
+            print(f"copy({dest_rank}, {src_buffer}, chunk_index)")
+            t = c.copy(dest_rank, src_buffer, chunk_index)
+            
+            # Log after chunk is successfully copied
+            print(f"Successfully copied chunk {chunk_index}")
+            
+            chunk_index += 1
+        except:
+            # Log when no more chunks are available (i.e., when the loop breaks)
+            print(f"No more chunks to copy. Finished sending buffer '{Buffer.input}' after {chunk_index} chunks.")
+            break
 
 
 def allreduce_swing(size, instances):
