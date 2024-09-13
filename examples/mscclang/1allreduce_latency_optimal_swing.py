@@ -32,7 +32,6 @@ def allreduce_swing(size, instances):
         def pi(r, s, n):
             p = (1 - math.pow(-2, s+1))/3
             peer = (r + p) % n if r % 2 == 0 else (r - p) % n
-            logger.debug(f"pi calculation for rank {r}, step {s}, size {n}: peer={peer}")
             return int(peer)
         
         # send_whole_buffer(0,1)
@@ -44,7 +43,7 @@ def allreduce_swing(size, instances):
                 peer = pi(r, step, size)
                 logger.debug(f"copying buffer of {r} into scratch of {peer}")
                 c = chunk(r, Buffer.input, index=0, size=size)
-                c.copy(peer, 'scratch')
+                c.copy(peer, 'scratch', 0)
 
             for rank in range(size):
                 logger.debug(f"reducing scratch buffer of {rank} into input buffer")
