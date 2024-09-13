@@ -21,23 +21,19 @@ def send_whole_buffer(source_rank, dest_rank, buffer_name='input'):
     print(f"Starting to send buffer '{buffer_name}' from rank {source_rank} to rank {dest_rank}")
     
     # Dynamically figure out the number of chunks
-    while True:
-        try:
-            print(f"chunking: chunk({source_rank}, {src_buffer}, {chunk_index})")                        
-            # Access each chunk and copy it
-            c = chunk(source_rank, src_buffer, chunk_index)
+    print(f"chunking: chunk({source_rank}, {src_buffer}, {chunk_index})")                        
+    # Access each chunk and copy it
+    c = chunk(source_rank, src_buffer, chunk_index)
 
-            print(f"copy({dest_rank}, {src_buffer}, {chunk_index})")
-            t = c.copy(dest_rank, src_buffer, chunk_index)
-            
-            # Log after chunk is successfully copied
-            print(f"Successfully copied chunk {chunk_index}")
-            
-            chunk_index += 1
-        except:
-            # Log when no more chunks are available (i.e., when the loop breaks)
-            print(f"No more chunks to copy. Finished sending buffer '{buffer_name}' after {chunk_index} chunks.")
-            break
+    print(f"copy({dest_rank}, {src_buffer}, {chunk_index})")
+    t = c.copy(dest_rank, src_buffer, chunk_index)
+    
+    # Log after chunk is successfully copied
+    print(f"Successfully copied chunk {chunk_index}")
+    
+    chunk_index += 1
+    # Log when no more chunks are available (i.e., when the loop breaks)
+    print(f"No more chunks to copy. Finished sending buffer '{buffer_name}' after {chunk_index} chunks.")
 
 
 def allreduce_swing(size, instances):
