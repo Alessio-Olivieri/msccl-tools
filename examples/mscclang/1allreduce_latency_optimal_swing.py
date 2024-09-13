@@ -18,9 +18,10 @@ def send_whole_buffer(source_rank, dest_rank):
     # Initialize the chunk index
     chunk_index = 0
     
-    print(f"Starting to send buffer '{Buffer.input}' from rank {source_rank} to rank {dest_rank}")
-    c = chunk(source_rank, Buffer.input, 0, 4).copy(dest_rank, Buffer.input, 0)
-    
+    c_source = chunk(source_rank, Buffer.input, 0, 4)
+    c_dest = chunk(dest_rank, Buffer.input, 0, 4)
+    c_dest.reduce(c_source)
+
 
 def allreduce_swing(size, instances):
     # Logical topology
