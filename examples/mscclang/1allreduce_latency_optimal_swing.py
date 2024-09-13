@@ -23,11 +23,12 @@ def send_whole_buffer(source_rank, dest_rank, buffer_name='input'):
     # Dynamically figure out the number of chunks
     while True:
         try:
-            # Log before each chunk is sent
-            print(f"Copying chunk {chunk_index} from rank {source_rank} to rank {dest_rank}")
-            
+            print(f"chunking: chunk({source_rank}, {src_buffer}, {chunk_index})")                        
             # Access each chunk and copy it
-            chunk(source_rank, src_buffer, chunk_index).copy(dest_rank, src_buffer, chunk_index)
+            c = chunk(source_rank, src_buffer, chunk_index)
+
+            print(f"copy({dest_rank}, {src_buffer}, {chunk_index})")
+            t = c.copy(dest_rank, src_buffer, chunk_index)
             
             # Log after chunk is successfully copied
             print(f"Successfully copied chunk {chunk_index}")
