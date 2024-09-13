@@ -50,8 +50,7 @@ def allreduce_swing(size, instances):
                 logger.debug(f"reducing scratch buffer of {rank} into input buffer")
                 c = chunk(rank, Buffer.input, 0, size=size)
                 c.reduce(chunk(rank, 'scratch', 0, size=size))
-                index += 1
-                tb += 1
+
             
 
 
