@@ -11,7 +11,10 @@ from msccl.language.chunk import *
 from msccl.language.buffer import *
 from msccl.language.rank_dag import *
 import msccl.collectives as collectives
+import logging
 # from msccl.language.visualize import *
+
+#logger = logging.getLogger(__name__)
 
 _current_program = None
 def _curr():
@@ -105,11 +108,14 @@ class MSCCLProgram:
 
     # Lower program to XML
     def lower(self):
+        #logger.debug("lowring msccl program")
         # self.chunk_dag._complete_metadata()
         # self.chunk_dag.channel_assignment()
         # self.chunk_dag.lower_instr_dag(self.instr_dag)
+        #logger.debug("Pre-emptively convert sets to lists")
         self.instr_dag.convert_set_list() # Pre-emptively convert sets to lists
         if self.instr_fusion:
+            #logger.debug("optimizing dag")
             self.instr_dag.optimize()
         self.instr_dag._complete_metadata()
         if self.threadblock_policy == ThreadblockPolicy.manual:
@@ -150,7 +156,7 @@ def create_scratch(rank, name):
     return _curr().create_scratch(rank, name)
 
 def XML():
-   print(_curr().generate_xml())
+    print(_curr().generate_xml())
 
 def Check():
     return _curr().check()
