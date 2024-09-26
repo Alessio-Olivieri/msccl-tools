@@ -102,3 +102,4 @@ parser.add_argument('pairs', type=bool, default=False, nargs='?')
 args = parser.parse_args()
 
 allreduce_swing(args.num_gpus, args.instances, args.pairs)
+# allreduce_swing(20, 1, True)
