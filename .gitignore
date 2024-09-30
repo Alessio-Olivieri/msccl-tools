@@ -133,3 +133,5 @@ dmypy.json
 .pyre/
 
 setup_leonardo.sh
+
+.vscode
