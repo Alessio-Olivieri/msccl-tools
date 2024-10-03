@@ -27,7 +27,7 @@ def get_rs_idxs(r, s, n):
             l += get_rs_idxs(peer, step+1, n)
         return l
 
-def allreduce_swing(size, instances):
+def allreduce_swing_all_sends(size, instances):
     # Logical topology
     topology = fully_connected(size)
     collective = AllReduce(size, size, inplace=True)
