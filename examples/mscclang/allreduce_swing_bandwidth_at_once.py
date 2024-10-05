@@ -6,6 +6,7 @@ from msccl.collectives import *
 from msccl.language.collectives import AllReduce
 import math
 import logging
+from copy import deepcopy
 
 
 # logger = logging.getLogger(__name__)
@@ -65,11 +66,12 @@ def allreduce_swing_optimized(size, instances):
         
         # All gather
         received = [[] for i in range(size)]
+        received_next = [[] for i in range(size)]
         for s in range(int(math.log2(size))-1, -1, -1):
             for r in range(size):
                 peer = pi(r, s, size)
                 to_send = [r] + received[r] #sends his block and the block received
-                received[peer] = received[peer] + to_send #update the received of the peer
+                received_next[peer] = received_next[peer] + to_send #update the received of the peer
 
                 # Step 1: Allocate scratch buffer size
                 scratch_size = len(to_send)
@@ -88,14 +90,17 @@ def allreduce_swing_optimized(size, instances):
                     # logger.debug(f"[{peer}] reducing scratch_receive[{i}] into output[{block_id}]")
                     chunk(peer, f'scratch_receive{peer}', index=i, size=1).copy(peer, Buffer.output, index=block_id)
             
+            received = deepcopy(received_next)
+            
         XML()
         Check()
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('num_gpus', type=int, help ='number of gpus')
-parser.add_argument('instances', type=int, help='number of instances')
-parser.add_argument('pairs', type=bool, default=False, nargs='?')
-args = parser.parse_args()
+# parser.add_argument('num_gpus', type=int, help ='number of gpus')
+# parser.add_argument('instances', type=int, help='number of instances')
+# parser.add_argument('pairs', type=bool, default=False, nargs='?')
+# args = parser.parse_args()
 
-allreduce_swing_optimized(args.num_gpus, args.instances)
+# allreduce_swing_optimized(args.num_gpus, args.instances)
+allreduce_swing_optimized(8, 1)

@@ -6,6 +6,7 @@ from msccl.collectives import *
 from msccl.language.collectives import AllReduce
 import math
 import logging
+from copy import deepcopy
 
 
 logger = logging.getLogger(__name__)
@@ -56,13 +57,24 @@ def allreduce_swing_all_sends(size, instances):
         
         # All gather
         received = [[] for i in range(size)]
+        received_next = [[] for i in range(size)]
         for s in range(int(math.log2(size))-1, -1, -1):
             for r in range(size):
                 peer = pi(r, s, size)
                 to_send = [r] + received[r] #sends his block and the block received
-                received[peer] = received[peer] + to_send #update the received of the peer
+                received_next[peer] = received_next[peer] + to_send #update the received of the peer
                 for block_id in to_send:
-                    chunk(r, Buffer.input, index=block_id, size=1).copy(peer, Buffer.input, index=block_id)
+                    logger.debug(f"[{r}] sending {block_id} in scratch buffer of {peer}")
+                    chunk(r, Buffer.input, index=block_id, size=1).copy(peer, 'scratch', index=block_id, sendtb=r, recvtb=peer)
+
+            for r in range(size):
+                peer = pi(r, s, size)
+                to_copy = [r] + received[r] #send the blocks the peer sent
+                for block_id in to_copy:
+                    logger.debug(f"[{peer}] copying {block_id} from scratch in input buffer")
+                    chunk(peer, 'scratch', index=block_id, size=1).copy(peer, Buffer.input, index=block_id)
+            
+            received = deepcopy(received_next)
                 
             
         XML()
@@ -131,7 +143,7 @@ def allreduce_swing_optimized(size, instances):
                     logger.debug(f"[{peer}] reducing scratch_receive[{i}] into output[{block_id}]")
                     chunk(peer, f'scratch_receive{peer}', index=i, size=1).copy(peer, Buffer.output, index=block_id)
             
-        # XML()
+        XML()
         Check()
 
 
@@ -144,4 +156,4 @@ parser = argparse.ArgumentParser()
 
 # allreduce_swing(args.num_gpus, args.instances, args.pairs)
 # allreduce_swing(4, 1)
-allreduce_swing_optimized(4, 1)
+allreduce_swing_all_sends(16, 1)
