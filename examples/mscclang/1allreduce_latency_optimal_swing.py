@@ -151,5 +151,5 @@ parser = argparse.ArgumentParser()
 # parser.add_argument('pairs', type=bool, default=False, nargs='?')
 # args = parser.parse_args()
 
-# allreduce_swing(args.num_gpus, args.instances, args.pairs)
-allreduce_swing_optimized(9, 1, True)
+# allreduce_swing_optimized(args.num_gpus, args.instances)
+# allreduce_swing_optimized(9, 1, True)
