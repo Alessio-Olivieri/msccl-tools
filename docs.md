@@ -1,3 +1,34 @@
+## Table of Contents
+1. [Introduction](#introduction)
+2. [Buffers](#buffers)
+   - [Chunks and Buffers](#chunks-and-buffers)
+   - [Using Scratch Buffers for Flexible Temporary Storage](#using-scratch-buffers-for-flexible-temporary-storage)
+   - [Creating and Assigning Buffer Slices](#creating-and-assigning-buffer-slices)
+3. [Chunks](#chunks)
+   - [Chunk Types](#chunk-types)
+   - [References](#references)
+   - [Operations](#operations)
+     - [split()](#splitself-num)
+     - [group()](#groupself-other)
+     - [copy()](#copyself-dst-bufferindex-sendtb-recvtb-ch)
+     - [reduce()](#reduceself-other_chunkref-sendtb-recvtb-ch)
+     - [get_origin_index()](#get_origin_indexself-index)
+     - [get_origin_rank()](#get_origin_rankself-index)
+     - [get_dst_index()](#get_dst_indexself-index)
+     - [get_dst_rank()](#get_dst_rankself-index)
+     - [print_chunk_info()](#print_chunk_infoself-index)
+   - [Examples](#examples)
+     - [Transferring the Whole Buffer](#transferring-the-whole-buffer)
+4. [Collectives](#collectives)
+   - [Overview](#overview)
+     - [Collective](#collective)
+   - [Collective Types](#collective-types)
+     - [AllToAll](#alltoall)
+     - [AllGather](#allgather)
+     - [AllReduce](#allreduce)
+     - [ReduceScatter](#reducescatter)
+
+---
 # Introduction
 MSCCLang is a high-level language for specifying collective communication algorithms in an intuitive chunk-oriented form. The language is available as a Python-integrated DSL.
 
@@ -9,7 +40,7 @@ MSCCLang is designed to expose GPU memory as named buffers that can be accessed 
 - **Scratch Buffer**: An uninitialized buffer that serves as temporary storage during computations.
 
 These buffers are divided into *chunks*.
-The primary goal of an MSCCLang program is to ensure that the **output buffer** on each GPU contains the correct chunks once the collective operation is complete. This is critical for ensuring correct and efficient data movement and transformation in parallel GPU environments.
+The primary goal of an MSCCLang program is to ensure that the **output buffer** on each GPU contains the correct chunks once the collective operation is complete.
 
 ## Chunks and buffers
 Chunks represent contiguous spans of data with a uniform size in the same buffer.
@@ -18,17 +49,18 @@ Chunks represent contiguous spans of data with a uniform size in the same buffer
 3. **Aliased Buffers**: Users can choose to alias the input and output buffers. This allows for *in-place* collective operations, where the input buffer is reused as the output buffer, minimizing memory usage and optimizing performance.
 
 ## Using Scratch Buffers for Flexible Temporary Storage
-MSCCL allows to organize the scratch buffer into slices. This gives user the possibility to treat each slice of the global scratch buffer as if it was an independent scratch buffer. 
-Each slice has an offset that represents the starting point within the global scratch buffer.
+MSCCL allows to organize the scratch buffer into named slices. This gives users the possibility to treat each slice of the global scratch buffer as if it was an independent scratch buffer. 
+Interanlly each slice has an offset that represents the starting point within the global scratch buffer of the rank it belongs to.
 
 ### Creating and Assigning Buffer Slices
 To create a slice of the global scratch buffer named "new_scratch_buffer" of a rank do:
    ```python
    c1.copy(rank, "new_scratch_buffer", index)
    ```
-   Such a buffer can then be treated normally as you would do with the classic "scratch" buffer.
-
-This approach allows multiple slices to coexist, each with a different offset, giving the illusion of multiple independent buffers within the same physical scratch buffer.
+   Such a buffer can then be treated normally as you would do with the classic "scratch" buffer, for example to address that buffer you would do:
+  ```python
+  c2 = chunk(rank, "new_scratch_buffer", index, size)
+   ```
 
 
 # Chunks
@@ -48,6 +80,12 @@ A reference is globally determined by 4 variables:
 - **Buffer** The buffer to which the chunks referenced belong to
 - **Index** The offset in the buffer of the first referenced chunk
 - **Size** The number of chunks referenced
+
+A reference is created with the **chunk** operation:
+```python
+# c1 is a reference to the whole input buffer of rank 0
+c1 = chunk(0, Buffer.input, 0, size=chunk_factor)
+```
 
 ### Operations
 Every operation on chunks is usually done by acting upon references to those chunks, these operations are exposed as methods of the Ref class:
@@ -70,11 +108,11 @@ Every operation on chunks is usually done by acting upon references to those chu
 - **Description**: Copies the current chunk to a destination rank (`dst`) and buffer. If the destination index or buffer is not specified, the method assumes the chunk is copied to the same location in the destination rank as in the source rank.
 - **Parameters**:
   - `dst (int)`: The destination rank where the chunk will be copied.
-  - `buffer`: The destination buffer (optional). If not specified, the current buffer is used.
+  - `buffer`: The destination buffer.
   - `index (int)`: The index in the destination buffer where the chunk will be placed (optional, defaults to the same index as the source).
-  - `sendtb (int)`: The rank sending: I found out that without specifying this i get strange behaviours
-  - `recvtb (int)`: The rank receiving Note: I found out that without specifying this i get strange behaviours
-  - `ch (int)`: Channel to use for communication (optional).
+  - `sendtb (int)`: The rank sending the chunk.
+  - `recvtb (int)`: The rank receiving the chunk.
+  - `ch (int)`: Channel to use for the communication (optional).
 - **Returns**: 
   - A `Ref` object pointing to the chunk at the destination after it has been copied.
 
@@ -82,8 +120,8 @@ Every operation on chunks is usually done by acting upon references to those chu
 - **Description**: Reduces the current chunk with another chunk (`other_chunkref`), combining their data into the current `Ref`.
 - **Parameters**:
   - `other_chunkref (Ref)`: The other chunk to reduce with the current one.
-  - `sendtb (int)`: Send timestamp (optional).
-  - `recvtb (int)`: Receive timestamp (optional).
+  - `sendtb (int)`: The sending rank
+  - `recvtb (int)`: the receiving rank
   - `ch (int)`: Channel to use for communication (optional).
 - **Returns**: 
   - The updated `Ref` object, now representing the reduced chunk.
@@ -120,6 +158,13 @@ Every operation on chunks is usually done by acting upon references to those chu
 - **Description**: Prints detailed information about the chunk at the specified index, including its origin rank, origin index, destination rank, and destination index.
 - **Parameters**:
   - `index (int)`: The offset within the chunk to retrieve and print its information (optional, default is 0).
+
+## Examples
+### Transfering the whole buffer
+We want to copy the input buffer of 0 into the input buffer of 1. We have to 'select' all the chunks in the buffer.input. To do so we use the chunk_factor which are the initial number of chunks in the input buffer
+``` python
+chunk(0, Buffer.input, index=0, size=chunk_factor).copy(1, Buffer.input, index=0, sendtb=0, recvtb=1)
+```
 
 
 # Collectives
