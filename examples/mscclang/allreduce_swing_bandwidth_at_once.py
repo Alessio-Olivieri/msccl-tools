@@ -97,10 +97,9 @@ def allreduce_swing_optimized(size, instances):
 
 
 parser = argparse.ArgumentParser()
-# parser.add_argument('num_gpus', type=int, help ='number of gpus')
-# parser.add_argument('instances', type=int, help='number of instances')
-# parser.add_argument('pairs', type=bool, default=False, nargs='?')
-# args = parser.parse_args()
+parser.add_argument('num_gpus', type=int, help ='number of gpus')
+parser.add_argument('instances', type=int, help='number of instances')
+parser.add_argument('pairs', type=bool, default=False, nargs='?')
+args = parser.parse_args()
 
-# allreduce_swing_optimized(args.num_gpus, args.instances)
-allreduce_swing_optimized(8, 1)
+allreduce_swing_optimized(args.num_gpus, args.instances)
