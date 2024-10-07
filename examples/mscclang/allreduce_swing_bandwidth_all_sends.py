@@ -83,7 +83,6 @@ def allreduce_swing_all_sends(size, instances):
 parser = argparse.ArgumentParser()
 parser.add_argument('num_gpus', type=int, help ='number of gpus')
 parser.add_argument('instances', type=int, help='number of instances')
-parser.add_argument('pairs', type=bool, default=False, nargs='?')
 args = parser.parse_args()
 
 allreduce_swing_all_sends(args.num_gpus, args.instances)
