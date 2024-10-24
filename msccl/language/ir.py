@@ -122,6 +122,7 @@ class Op:
     prev: list = field(default_factory=list) # List of instructions that happen before
     next: list = field(default_factory=list) # List of instructions that happen after
     num: int = -1
+    position = None
     chunk_step: int = -1
     priority: int = -1
     recv_match =  None
@@ -195,6 +196,9 @@ class Op:
 
     def __hash__(self):
         return id(self)
+    
+    def __str__(self):
+        return f'Op({self.inst}, {self.rank}, {self.src}, {self.dst}, step:{self.step}, tb:{self.tb})'
 
     def __repr__(self):
         return f'Op({self.inst}, {self.rank}, {self.src}, {self.dst}, step:{self.step}, tb:{self.tb})'

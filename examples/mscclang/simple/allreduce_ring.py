@@ -34,11 +34,14 @@ def allreduce_ring(size, instances):
 
         Check()
         XML()
+        Print_instruction_dag()
 
-parser = argparse.ArgumentParser()
-parser.add_argument('num_gpus', type=int, help ='number of gpus')
-parser.add_argument('instances', type=int, help='number of instances')
+# parser = argparse.ArgumentParser()
+# parser.add_argument('num_gpus', type=int, help ='number of gpus')
+# parser.add_argument('instances', type=int, help='number of instances')
 
-args = parser.parse_args()
+# args = parser.parse_args()
 
-allreduce_ring(args.num_gpus, args.instances)
+# allreduce_ring(args.num_gpus, args.instances)
+
+allreduce_ring(4, 1)

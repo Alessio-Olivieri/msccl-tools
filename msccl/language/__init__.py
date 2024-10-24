@@ -11,6 +11,7 @@ from msccl.language.chunk import *
 from msccl.language.buffer import *
 from msccl.language.rank_dag import *
 import msccl.collectives as collectives
+from msccl.language.visualize_inst_dag import *
 import logging
 # from msccl.language.visualize import *
 
@@ -135,17 +136,29 @@ class MSCCLProgram:
         return ir_to_xml(self.lower(), dependence_nop=self.dependence_nop)
     
     def print_chunk_dag(self):
-        visualize_chunk_dag(self.chunk_dag.chunk_paths)
+        visualize_chunk_dag(self.instr_dag.operations)
+    
+    def print_rank_dag(self):
+        visualize_rank_dag(self.instr_dag.operations)
 
-    def print_instr_dags(self, rank):
-        if rank == 0:
-            for r in range(len(self.ranks)):
-                visualize_instr_dag(self.instr_dags[r].operations)
-        else:
-            visualize_instr_dag(self.instr_dags[rank].operations)
+    def print_instruction_dag(self):
+        visualize_instruction_dag(self.instr_dag, self.collective)
+    
+    def print_ir(self):
+        visualize_instruction_ir(self.lower())
 
-def Print():
+
+def Print_rank_dag():
+    _curr().print_rank_dag()
+
+def Print_chunk_dag():
     _curr().print_chunk_dag()
+
+def Print_instruction_dag():
+    _curr().print_instruction_dag()
+
+def Print_ir():
+    _curr().print_ir()
 
 def chunk(rank, buffer, index, size=1):
     if _curr().buffers[rank][buffer][index] is None:

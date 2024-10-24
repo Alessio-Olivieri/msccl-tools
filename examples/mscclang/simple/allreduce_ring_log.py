@@ -49,12 +49,14 @@ def allreduce_ring(size, instances):
 
     logging.info("MSCCL program completed successfully.")
 
-parser = argparse.ArgumentParser()
-parser.add_argument('num_gpus', type=int, help ='number of gpus')
-parser.add_argument('instances', type=int, help='number of instances')
+# parser = argparse.ArgumentParser()
+# parser.add_argument('num_gpus', type=int, help ='number of gpus')
+# parser.add_argument('instances', type=int, help='number of instances')
 
-args = parser.parse_args()
+# args = parser.parse_args()
 
-logging.info(f"Program started with {args.num_gpus} GPUs and {args.instances} instances.")
-allreduce_ring(args.num_gpus, args.instances)
-logging.info("Program execution finished.")
+# logging.info(f"Program started with {args.num_gpus} GPUs and {args.instances} instances.")
+# allreduce_ring(args.num_gpus, args.instances)
+# logging.info("Program execution finished.")
+
+allreduce_ring(4,1)

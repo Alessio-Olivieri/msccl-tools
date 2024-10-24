@@ -58,10 +58,10 @@ def allreduce(size, instances, protocol):
             for r in range(size_log2):
                 peer = pi(r, step, size_log2)
                 logger.debug(f"copying input buffer of {aliases[r]} into scratch of {aliases[peer]}")
-                chunk(aliases[r], Buffer.input, index=0, size=size).copy(aliases[peer], 'scratch', 0, recvtb=aliases[peer], sendtb=aliases[r])
-            for r in range(size_log2):
-                logger.debug(f"reducing scratch buffer of {aliases[r]} into the input buffer of {aliases[r]}")
-                chunk(aliases[r], Buffer.input, 0, size=size).reduce(chunk(aliases[r], 'scratch', 0, size=size))
+                chunk(aliases[r], Buffer.input, index=0, size=size).reduce(chunk(aliases[peer], Buffer.input, 0, size=size))
+            # for r in range(size_log2):
+            #     logger.debug(f"reducing scratch buffer of {aliases[r]} into the input buffer of {aliases[r]}")
+            #     chunk(aliases[r], Buffer.input, 0, size=size).reduce(chunk(aliases[r], 'scratch', 0, size=size))
         
         for r, extrar in siblings:
             chunk(r, Buffer.input, 0, size=size).copy(extrar, Buffer.input, 0, recvtb=extrar, sendtb=r)

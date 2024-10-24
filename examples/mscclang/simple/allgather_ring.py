@@ -24,6 +24,7 @@ def allgather_ring(size):
                 c = c.copy(next, buffer=Buffer.output, index=r)
                 next = (next + 1) % size
         XML()
+        Print_instruction_dag()
         Check()
 
 def allgather_ring_inplace(size):
