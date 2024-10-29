@@ -121,13 +121,15 @@ class Op:
     tb: int = -1 # TB this op is assigned to
     prev: list = field(default_factory=list) # List of instructions that happen before
     next: list = field(default_factory=list) # List of instructions that happen after
-    num: int = -1
     position = None
     chunk_step: int = -1
     priority: int = -1
     recv_match =  None
     send_match =  None
     channel: int = -1
+    # For printing operations
+    num: int = -1
+    root: tuple = field(default_factory=tuple) 
 
     def cnt(self):
         if self.src:
@@ -151,7 +153,22 @@ class Op:
             self.inst == Instruction.recv_reduce_copy_send or \
             self.inst == Instruction.recv_copy_send or \
             self.inst == Instruction.recv_reduce_send
+    
+    def is_write(self):
+        return  self.inst == Instruction.recv or \
+                    self.inst == Instruction.recv_reduce_copy or \
+                    self.inst == Instruction.recv_reduce_copy_send or \
+                    self.inst == Instruction.recv_copy_send or \
+                    self.inst == Instruction.copy or \
+                    self.inst == Instruction.reduce
+    
+    def is_reduce(self):
+        return  self.inst == Instruction.reduce or \
+                    self.inst == Instruction.recv_reduce_copy or \
+                    self.inst == Instruction.recv_reduce_copy_send or \
+                    self.inst == Instruction.recv_reduce_send
 
+    
     def is_fused(self):
         return self.inst == Instruction.recv_reduce_copy_send or \
             self.inst == Instruction.recv_copy_send or \
