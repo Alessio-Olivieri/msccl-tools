@@ -78,11 +78,13 @@ def allreduce_swing_all_sends(size, instances):
                 
             
         XML()
+        Print_instruction_dag()
         Check()
 
-parser = argparse.ArgumentParser()
-parser.add_argument('num_gpus', type=int, help ='number of gpus')
-parser.add_argument('instances', type=int, help='number of instances')
-args = parser.parse_args()
+# parser = argparse.ArgumentParser()
+# parser.add_argument('num_gpus', type=int, help ='number of gpus')
+# parser.add_argument('instances', type=int, help='number of instances')
+# args = parser.parse_args()
 
-allreduce_swing_all_sends(args.num_gpus, args.instances)
+# allreduce_swing_all_sends(args.num_gpus, args.instances)
+allreduce_swing_all_sends(4, 1)

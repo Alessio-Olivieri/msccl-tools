@@ -38,12 +38,15 @@ def allreduce_allpairs(gpus, instances, protocol):
                 
         XML()
         Check()
+        Print_instruction_dag()
+
 
 parser = argparse.ArgumentParser()
-parser.add_argument('num_gpus', type=int, help ='number of gpus')
-parser.add_argument('instances', type=int, help='number of instances')
-parser.add_argument('--protocol', type=str, default='LL', choices=['Simple', 'LL128', 'LL'], help='Protocol')
+# parser.add_argument('num_gpus', type=int, help ='number of gpus')
+# parser.add_argument('instances', type=int, help='number of instances')
+# parser.add_argument('--protocol', type=str, default='LL', choices=['Simple', 'LL128', 'LL'], help='Protocol')
 
-args = parser.parse_args()
+# args = parser.parse_args()
 
-allreduce_allpairs(args.num_gpus, args.instances, args.protocol)
+# allreduce_allpairs(args.num_gpus, args.instances, args.protocol)
+allreduce_allpairs(4, 1, "LL")

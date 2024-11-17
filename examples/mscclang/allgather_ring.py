@@ -24,13 +24,16 @@ def allgather_ring(size, channels, instances, protocol):
                 c = c.copy(next_rank, Buffer.output, index, sendtb=channel, recvtb=channel, ch=channel)   
         XML()
         Check()
+        Print_instruction_dag()
+
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('num_gpus', type=int, help ='number of gpus')
-parser.add_argument('channels', type=int, help='Number of channels to use for 1 instance of the ring [1-8]')
-parser.add_argument('instances', type=int, help='number of instances')
-parser.add_argument('--protocol', type=str, default='LL128', choices=['Simple', 'LL', 'LL128'], help ='NCCL protocol. Default: Simple')
-args = parser.parse_args()
+# parser.add_argument('num_gpus', type=int, help ='number of gpus')
+# parser.add_argument('channels', type=int, help='Number of channels to use for 1 instance of the ring [1-8]')
+# parser.add_argument('instances', type=int, help='number of instances')
+# parser.add_argument('--protocol', type=str, default='LL128', choices=['Simple', 'LL', 'LL128'], help ='NCCL protocol. Default: Simple')
+# args = parser.parse_args()
 
-allgather_ring(args.num_gpus, args.channels, args.instances, args.protocol)
+# allgather_ring(args.num_gpus, args.channels, args.instances, args.protocol)
+allgather_ring(4, 3, 2, "LL")

@@ -22,11 +22,13 @@ def allgather_recursive_doubling(size, instances, protocol):
 
         XML()
         Check()
+        Print_instruction_dag()
 
-parser = argparse.ArgumentParser()
-parser.add_argument('num_gpus', type=int, help ='number of gpus')
-parser.add_argument('instances', type=int, help ='number of instances')
-parser.add_argument('--protocol', type=str, default='Simple', choices=['Simple', 'LL', 'LL128'], help ='NCCL protocol. Default: Simple')
-args = parser.parse_args()
+# parser = argparse.ArgumentParser()
+# parser.add_argument('num_gpus', type=int, help ='number of gpus')
+# parser.add_argument('instances', type=int, help ='number of instances')
+# parser.add_argument('--protocol', type=str, default='Simple', choices=['Simple', 'LL', 'LL128'], help ='NCCL protocol. Default: Simple')
+# args = parser.parse_args()
 
-allgather_recursive_doubling(args.num_gpus, args.instances, args.protocol)
+# allgather_recursive_doubling(args.num_gpus, args.instances, args.protocol)
+allgather_recursive_doubling(4, 1, "LL")

@@ -46,6 +46,7 @@ def allreduce_ring(size, instances):
         
         Check()
         XML()
+        Print_instruction_dag()
 
     logging.info("MSCCL program completed successfully.")
 

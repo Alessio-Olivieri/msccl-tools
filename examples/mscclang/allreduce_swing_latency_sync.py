@@ -67,12 +67,14 @@ def allreduce_swing_optimized(size, instances):
         
         XML()
         Check()
+        Print_instruction_dag()
 
 
 
-parser = argparse.ArgumentParser()
-parser.add_argument('num_gpus', type=int, help ='number of gpus')
-parser.add_argument('instances', type=int, help='number of instances')
-args = parser.parse_args()
+# parser = argparse.ArgumentParser()
+# parser.add_argument('num_gpus', type=int, help ='number of gpus')
+# parser.add_argument('instances', type=int, help='number of instances')
+# args = parser.parse_args()
 
-allreduce_swing_optimized(args.num_gpus, args.instances)
+# allreduce_swing_optimized(args.num_gpus, args.instances)
+allreduce_swing_optimized(4, 1)

@@ -68,6 +68,7 @@ def allreduce(size, instances, protocol):
 
         XML()
         Check()  
+        Print_instruction_dag()
         # Crint()
 
 

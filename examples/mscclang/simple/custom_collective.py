@@ -63,6 +63,7 @@ def custom_example1():
 
         XML() # Generates the XML for this collective
         Check() # Checks the routes defined for each chunk are correct. Currently doesn't check XML correct
+        Print_instruction_dag()
 
 def custom_example2():
 
