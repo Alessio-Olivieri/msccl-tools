@@ -3,9 +3,6 @@ from msccl.language.ir import *
 from msccl.language.rank_dag import *
 from msccl.language.collectives import *
 
-import random
-random.seed(1234)
-
 def infer_init_buffers(collective_name):
     if collective_name == "allgather":
         pass
@@ -43,10 +40,7 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
     roots = {}
     # last_writers -> (slot -> op) for each chunk the operation that wrote it last
     last_writers = {}
-    def argmin(a):
-        return min(range(len(a)), key=lambda x : a[x])
-    def argmax(a):
-        return max(range(len(a)), key=lambda x : a[x])
+    non_root_chunks = {}
 
     def format_label(buffer, rank, index):
         'Creates a representative string for the chunk'
@@ -104,38 +98,29 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
         op.root = (op.src.buffer, op.src.rank, op.src.index)
         return nnodes
 
-    def processed_dep(op) -> bool:
+    def processed_dep(op: Op) -> bool:
         # Maybe: fix when a dependence is that the src chunk is never writter
         if (op.send_match in visited or op.send_match == None):
             if all(dep in visited for dep in op.depends):
-                if (op.src.buffer, op.src.rank, op.src.index) in last_writers:
+                if all(src_chunk in last_writers for src_chunk in 
+                       ((op.src.buffer, op.src.rank, index) for index in range(op.src.index, op.src.index + op.src.size))):
                     return True
         return False
-    
-    def populate_non_root_chunks(collective, nnodes):
-        non_root_chunks = {}
-        
-        for buffer in [Buffer.output]:
-            for rank in range(collective.num_ranks):
-                for index in range(collective.chunk_factor):
-                    key = (buffer, rank, index)
-                    non_root_chunks[key] = add_chunk_node(buffer, rank, index, 0, nnodes)
-                    nnodes += 1
 
-        op: Op
-        # Populate scratch buffers:
-        for op in operations:
-            if op.dst.buffer == Buffer.scratch:
-                for index in range(op.dst.index, op.dst.index + op.dst.size):
-                    key = (Buffer.scratch, op.dst.rank, index)
-                    if key not in non_root_chunks:
-                        non_root_chunks.update({key : add_chunk_node(Buffer.scratch, op.dst.rank, index, 0, nnodes)})
-                        nnodes += 1
+        # op: Op
+        # # Populate scratch buffers:
+        # for op in operations:
+        #     if op.dst.buffer == Buffer.scratch:
+        #         for index in range(op.dst.index, op.dst.index + op.dst.size):
+        #             key = (Buffer.scratch, op.dst.rank, index)
+        #             if key not in non_root_chunks:
+        #                 non_root_chunks.update({key : add_chunk_node(Buffer.scratch, op.dst.rank, index, 0, nnodes)})
+        #                 nnodes += 1
                     
         
-        return non_root_chunks, nnodes
+        return nnodes
     
-    def assign_op_nodes(operations: list):
+    def assign_op_nodes(operations):
         # Puts all the operations except the starting ones in a list without keeping the gerarchy of the rank execution,
         # which is not necessary since the informations of the various operations are stored in each operation
         # Assigns a number to each node and returns the number of assigned nodes
@@ -145,6 +130,13 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
         visited = set()
         operations_result = []
         visited_result = set()
+
+        for buffer in [Buffer.output]:
+            for rank in range(collective.num_ranks):
+                for index in range(collective.chunk_factor):
+                    key = (buffer, rank, index)
+                    non_root_chunks[key] = add_chunk_node(buffer, rank, index, 0, nnodes)
+                    nnodes += 1
 
         for slot, ops in operations.items():
             frontier = [ops]
@@ -162,11 +154,28 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
                     else:
                         operations_result.append(op)
                         nnodes = add_op_node(op, nnodes)
+
+                        if op.dst.buffer == Buffer.scratch:
+                            for index in range(op.dst.index, op.dst.index + op.dst.size):
+                                key = (Buffer.scratch, op.dst.rank, index)
+                                if key not in non_root_chunks:
+                                    non_root_chunks.update({key : add_chunk_node(Buffer.scratch, op.dst.rank, index, 0, nnodes)})
+                                    nnodes += 1
+
                 for next_op in op.next:
                     if next_op not in visited:
                         operations_result.append(next_op)
                         visited.add(next_op)
                         nnodes = add_op_node(next_op, nnodes)
+
+                        if next_op.dst.buffer == Buffer.scratch:
+                            for index in range(next_op.dst.index, next_op.dst.index + next_op.dst.size):
+                                key = (Buffer.scratch, next_op.dst.rank, index)
+                                if key not in non_root_chunks:
+                                    non_root_chunks.update({key : add_chunk_node(Buffer.scratch, next_op.dst.rank, index, 0, nnodes)})
+                                    nnodes += 1
+
+
                 frontier = frontier[1:] + op.next
 
         return nnodes, operations_result, visited_result    
@@ -398,7 +407,7 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
             queue = new_queue
             floor += 1
         eh = list(zip(x,y))
-        return eh
+        return eh, max(x), max(y)
                 
 
                 
@@ -412,7 +421,7 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
 
     # slot -> op 
     # Used when the condition  if chunk_index_src.issuperset(chunk_index_last_writer) is not respected
-    non_root_chunks, nnodes = populate_non_root_chunks(collective, nnodes)
+    # nnodes = populate_non_root_chunks(collective, nnodes)
 
     visiting_order = []
     while len(operations) > 0:
@@ -438,20 +447,21 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
     g = remove_zero_degree_nodes(g)
     
     layout = "auto"
-    layout = build_layout(g)
+    layout, maxx, maxy = build_layout(g)
     style = {
-    "vertex_label_size": 4,  
+    "vertex_label_size": 12,  
     "vertex_label_dist": 0,  
-    "vertex_size": 10,  # Increase size
-    "vertex_width": 17,
-    "edge_width": 1,  
+    "vertex_size": 25,  # Increase size
+    "vertex_width": 40,
+    "edge_width": 2,  
+    "arrow_size":10,
     "layout": layout,
     "vertex_color": g.vs["colors"],
     "vertex_label": g.vs["labels"],
     "vertex_shape": g.vs["shapes"],
-    "bbox": (nnodes * 20, nnodes * 20)
+    "bbox": (maxx*100, maxy*100)
     }
-    ig.plot(g, **style, target="ciao.pdf")
-    print(visiting_order)
+    print(maxx*100, maxy*105)
+    ig.plot(g, **style, target="OUT.pdf")
     
          
