@@ -104,7 +104,8 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
             if all(dep in visited for dep in op.depends):
                 if all(src_chunk in last_writers for src_chunk in 
                        ((op.src.buffer, op.src.rank, index) for index in range(op.src.index, op.src.index + op.src.size))):
-                    return True
+                    if all(previous in visited for previous in op.prev):
+                        return True
         return False
 
         # op: Op
@@ -293,8 +294,6 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
         return nnodes
     
     def build_layout(g: ig.Graph):
-        def flatten(xss):
-            return [x for xs in xss for x in xs]
         def infer_next_ops(node):
             return [neighbor for neighbor in g.neighbors(node, mode="out")
                         if g.vs[neighbor]["type"] == "op"]
@@ -336,10 +335,10 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
                 
                 offset += 1  # Move to the next offset
             return selected
+            next_ops = infer_next_ops(root)
             
         def set_x_op(root, start_x):
             x[root] = start_x + ((leaf_count[root]*3)//2)
-            next_ops = infer_next_ops(root)
             for neighbor in next_ops:  # Get the neighbors of the current vertex
                 set_x_op(neighbor, start_x)
 
@@ -409,7 +408,140 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
         eh = list(zip(x,y))
         return eh, max(x), max(y)
                 
+    def build_layout1(g: ig.Graph):
+        def infer_next_ops(node):
+            return [neighbor for neighbor in g.neighbors(node, mode="out")
+                        if g.vs[neighbor]["type"] == "op"]
+        def infer_read_chunks(node):
+            return [neighbor for neighbor in g.neighbors(node, mode="in")
+                                    if g.vs[neighbor]["type"] == "c" and neighbor not in roots]
+        def infer_write_chunks(node):
+            return [neighbor for neighbor in g.neighbors(node, mode="out")
+                                    if g.vs[neighbor]["type"] == "c" and neighbor not in roots]
+        def infer_leafs_count(root):
+            next_ops = infer_next_ops(root)
+            if next_ops == []:
+                return 1
+            else:
+                leafcount = 0
+                for neighbor in next_ops:  # Get the neighbors of the current vertex
+                    leafcount += infer_leafs_count(neighbor)
+                leaf_count[root] = leafcount
+                return leafcount
+            
+        def set_x_op(root, start_x):
+            x[root] = start_x + ((leaf_count[root]*3)//2)
+            next_ops = infer_next_ops(root)
+            for neighbor in next_ops:  # Get the neighbors of the current vertex
+                set_x_op(neighbor, start_x)
 
+        def set_chunknodes_positions(floor_nodes):
+            # returns the maximum height of the biggest group of added chunks in this floor
+
+            added_chunks = [] # number of chunks interacting with each op node of this floor
+
+            # set positions for chunks in and out
+            for op_node in floor_nodes:
+                chunks_in = infer_read_chunks(op_node)
+                for i, chunk in enumerate(chunks_in):
+                    x[chunk] = x[op_node] - 1
+                    y[chunk] = y[op_node] + i / 5
+                added_chunks.append(len(chunks_in))
+                chunks_out = infer_write_chunks(op_node)
+                for i, chunk in enumerate(chunks_out):
+                    x[chunk] = x[op_node] + 1
+                    y[chunk] = y[op_node] + i / 5
+                added_chunks.append(len(chunks_out))
+
+            max_y = max(added_chunks) / 5 + 1 
+            return max_y
+
+        x = [-1] * len(g.vs)
+        y = [-1] * len(g.vs)
+        roots = [i for i, height in enumerate(g.vs["steps"]) if height==0]
+        leaf_count = [-1]*len(g.vs)
+        for root in roots:
+            infer_leafs_count(root) # saves in leaf_count
+            y[root] = 0
+
+        # Set x for the root nodes
+        prev_child_pos = 0 # the starting position of the childs on the left
+        for root in roots:
+            x[root] = prev_child_pos + (leaf_count[root] * 3 // 2)
+            prev_child_pos += leaf_count[root] * 3
+
+
+        floor_nodes = roots.copy() # Nodes currently in this floor
+        queue = [] # Nodes that are the next nodes of a node in a previous floor but the floor is different from floor + 1 (prev_node, next_node)
+        floor = 0
+        current_height = 0
+        while floor_nodes:
+            added_chunks_height = set_chunknodes_positions(floor_nodes)
+            current_height += added_chunks_height
+
+            next_floor_nodes = []
+            for node in queue:
+                if floor + 1 == g.vs["steps"][node]:
+                    next_floor_nodes.append(node)
+
+            next_nodes = [infer_next_ops(node) for node in floor_nodes]
+            for node in next_nodes:
+                if floor + 1 != g.vs["steps"][node]:
+                    queue.append(node)
+                else:
+                    next_floor_nodes.append(node)
+
+            for node in floor_nodes:
+                next_nodes = infer_next_ops
+
+
+            for node in next_floor_nodes:
+                y[node] = current_height + 1
+                infer_leafs_count(node) # saves in leaf_count
+            
+
+            # Set x for the root nodes
+            prev_child_pos = 0 # the starting position of the childs on the left
+            for root in roots:
+                x[root] = prev_child_pos + (leaf_count[root] * 3 // 2)
+                prev_child_pos += leaf_count[root] * 3
+
+            
+
+            floor_nodes = next_floor_nodes.copy()
+        eh = list(zip(x,y))
+        return eh, max(x), max(y)
+    
+    def draw():
+        g = ig.Graph(nnodes, edges, directed=True)
+        g.vs["type"] = vertex_types
+        g.vs["labels"] = vertex_labels
+        g.vs["colors"] = vertex_colors
+        g.vs["shapes"] = vertex_shapes
+        g.vs["types"] = vertex_types
+        g.vs["steps"] = vertex_height
+        
+        g = remove_zero_degree_nodes(g)
+        
+        layout = "auto"
+        layout, maxx, maxy = build_layout(g)
+        style = {
+        "vertex_label_size": 12,  
+        "vertex_label_dist": 0,  
+        "vertex_size": 25,  # Increase size
+        "vertex_width": 40,
+        "edge_width": 2,  
+        "arrow_size":10,
+        "layout": layout,
+        "vertex_color": g.vs["colors"],
+        "vertex_label": g.vs["labels"],
+        "vertex_shape": g.vs["shapes"],
+        "bbox": (maxx*100, maxy*100)
+        }
+        print(maxx*100, maxy*105)
+        ig.plot(g, **style, target="OUT.pdf")
+
+    
                 
 
     
@@ -432,36 +564,9 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
             visiting_order.append(op)
             nnodes = connect_generate_chunk(op, nnodes)    
             operations = operations[1:]
+            draw()
 
         else: operations = operations[1:] + [op]
 
-
-    g = ig.Graph(nnodes, edges, directed=True)
-    g.vs["type"] = vertex_types
-    g.vs["labels"] = vertex_labels
-    g.vs["colors"] = vertex_colors
-    g.vs["shapes"] = vertex_shapes
-    g.vs["types"] = vertex_types
-    g.vs["steps"] = vertex_height
-    
-    g = remove_zero_degree_nodes(g)
-    
-    layout = "auto"
-    layout, maxx, maxy = build_layout(g)
-    style = {
-    "vertex_label_size": 12,  
-    "vertex_label_dist": 0,  
-    "vertex_size": 25,  # Increase size
-    "vertex_width": 40,
-    "edge_width": 2,  
-    "arrow_size":10,
-    "layout": layout,
-    "vertex_color": g.vs["colors"],
-    "vertex_label": g.vs["labels"],
-    "vertex_shape": g.vs["shapes"],
-    "bbox": (maxx*100, maxy*100)
-    }
-    print(maxx*100, maxy*105)
-    ig.plot(g, **style, target="OUT.pdf")
     
          
