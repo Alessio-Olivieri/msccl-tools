@@ -335,7 +335,6 @@ def visualize_instruction_dag(format, instruction_dag: InstructionDAG, collectiv
                 
                 offset += 1  # Move to the next offset
             return selected
-            next_ops = infer_next_ops(root)
             
         def set_x_op(root, start_x):
             x[root] = start_x + ((leaf_count[root]*3)//2)
@@ -405,113 +404,8 @@ def visualize_instruction_dag(format, instruction_dag: InstructionDAG, collectiv
 
             queue = new_queue
             floor += 1
-        eh = list(zip(x,y))
-        return eh, max(x), max(y)
-                
-    def build_layout1(g: ig.Graph):
-        def infer_next_ops(node):
-            return [neighbor for neighbor in g.neighbors(node, mode="out")
-                        if g.vs[neighbor]["type"] == "op"]
-        def infer_read_chunks(node):
-            return [neighbor for neighbor in g.neighbors(node, mode="in")
-                                    if g.vs[neighbor]["type"] == "c" and neighbor not in roots]
-        def infer_write_chunks(node):
-            return [neighbor for neighbor in g.neighbors(node, mode="out")
-                                    if g.vs[neighbor]["type"] == "c" and neighbor not in roots]
-        def infer_leafs_count(root):
-            next_ops = infer_next_ops(root)
-            if next_ops == []:
-                return 1
-            else:
-                leafcount = 0
-                for neighbor in next_ops:  # Get the neighbors of the current vertex
-                    leafcount += infer_leafs_count(neighbor)
-                leaf_count[root] = leafcount
-                return leafcount
-            
-        def set_x_op(root, start_x):
-            x[root] = start_x + ((leaf_count[root]*3)//2)
-            next_ops = infer_next_ops(root)
-            for neighbor in next_ops:  # Get the neighbors of the current vertex
-                set_x_op(neighbor, start_x)
-
-        def set_chunknodes_positions(floor_nodes):
-            # returns the maximum height of the biggest group of added chunks in this floor
-
-            added_chunks = [] # number of chunks interacting with each op node of this floor
-
-            # set positions for chunks in and out
-            for op_node in floor_nodes:
-                chunks_in = infer_read_chunks(op_node)
-                for i, chunk in enumerate(chunks_in):
-                    x[chunk] = x[op_node] - 1
-                    y[chunk] = y[op_node] + i / 4
-                added_chunks.append(len(chunks_in))
-                chunks_out = infer_write_chunks(op_node)
-                for i, chunk in enumerate(chunks_out):
-                    x[chunk] = x[op_node] + 1
-                    y[chunk] = y[op_node] + i / 4
-                added_chunks.append(len(chunks_out))
-
-            max_y = max(added_chunks) / 4 + 1 
-            return max_y
-
-        x = [-1] * len(g.vs)
-        y = [-1] * len(g.vs)
-        roots = [i for i, height in enumerate(g.vs["steps"]) if height==0]
-        leaf_count = [-1]*len(g.vs)
-        for root in roots:
-            infer_leafs_count(root) # saves in leaf_count
-            y[root] = 0
-
-        # Set x for the root nodes
-        prev_child_pos = 0 # the starting position of the childs on the left
-        for root in roots:
-            x[root] = prev_child_pos + (leaf_count[root] * 3 // 2)
-            prev_child_pos += leaf_count[root] * 3
-
-
-        floor_nodes = roots.copy() # Nodes currently in this floor
-        queue = [] # Nodes that are the next nodes of a node in a previous floor but the floor is different from floor + 1 (prev_node, next_node)
-        floor = 0
-        current_height = 0
-        while floor_nodes:
-            added_chunks_height = set_chunknodes_positions(floor_nodes)
-            current_height += added_chunks_height
-
-            next_floor_nodes = []
-            for node in queue:
-                if floor + 1 == g.vs["steps"][node]:
-                    next_floor_nodes.append(node)
-
-            next_nodes = [infer_next_ops(node) for node in floor_nodes]
-            for node in next_nodes:
-                if floor + 1 != g.vs["steps"][node]:
-                    queue.append(node)
-                else:
-                    next_floor_nodes.append(node)
-
-            for node in floor_nodes:
-                next_nodes = infer_next_ops
-
-
-            for node in next_floor_nodes:
-                y[node] = current_height + 1
-                infer_leafs_count(node) # saves in leaf_count
-            
-
-            # Set x for the root nodes
-            prev_child_pos = 0 # the starting position of the childs on the left
-            for root in roots:
-                x[root] = prev_child_pos + (leaf_count[root] * 3 // 2)
-                prev_child_pos += leaf_count[root] * 3
-
-            
-
-            floor_nodes = next_floor_nodes.copy()
-        eh = list(zip(x,y))
-        return eh, max(x), max(y)
-    
+        return list(zip(x,y)), max(x), max(y)
+                    
     def draw():
         g = ig.Graph(nnodes, edges, directed=True)
         g.vs["type"] = vertex_types
@@ -541,10 +435,6 @@ def visualize_instruction_dag(format, instruction_dag: InstructionDAG, collectiv
         print(maxx*100, maxy*105)
         ig.plot(g, **style, target=f"OUT.{format}")
 
-    
-                
-
-    
     nnodes, operations, visited = assign_op_nodes(instruction_dag.operations)
     # nnodes -> total number of nodes in graph [initialized to the number of operations]
     # operations -> list with all the operations still to visit [initialized with the non 'st' operations]
