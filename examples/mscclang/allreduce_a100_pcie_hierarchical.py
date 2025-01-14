@@ -94,8 +94,8 @@ def hierarchical_allreduce(gpus, instances, protocol):
             allpairs_all_gather(gpuIds, size, 0)
 
         XML()
-        Print_instruction_dag()
         Check()
+        Print_instruction_dag()
 
 parser = argparse.ArgumentParser()
 # parser.add_argument('num_gpus', type=int, help ='number of gpus')
@@ -105,4 +105,4 @@ parser = argparse.ArgumentParser()
 # args = parser.parse_args()
 
 # hierarchical_allreduce(args.num_gpus, args.instances, args.protocol)
-hierarchical_allreduce(2, 1, "LL")
+hierarchical_allreduce(4, 1, "LL")

@@ -31,4 +31,4 @@ def allgather_recursive_doubling(size, instances, protocol):
 # args = parser.parse_args()
 
 # allgather_recursive_doubling(args.num_gpus, args.instances, args.protocol)
-allgather_recursive_doubling(4, 1, "LL")
+allgather_recursive_doubling(8, 1, "LL")

@@ -75,15 +75,19 @@ def hierarchical_allreduce(num_local_gpus, num_nodes, instances, protocol, sched
 
         XML()
         Check()
+        Print_instruction_dag("pdf")
 
-parser = argparse.ArgumentParser()
-parser.add_argument('num_gpus', type=int, help='number of gpus per node')
-parser.add_argument('num_nodes', type=int, help='number of nodes')
-parser.add_argument('instances', type=int, help='number of instances')
-parser.add_argument('--protocol', type=str, default='Simple', choices=['Simple', 'LL128', 'LL'], help='Protocol')
-parser.add_argument('--schedule', type=str, default='auto', choices=['auto', 'manual'], help='Scheduling')
+# parser = argparse.ArgumentParser()
+# parser.add_argument('num_gpus', type=int, help='number of gpus per node')
+# parser.add_argument('num_nodes', type=int, help='number of nodes')
+# parser.add_argument('instances', type=int, help='number of instances')
+# parser.add_argument('--protocol', type=str, default='Simple', choices=['Simple', 'LL128', 'LL'], help='Protocol')
+# parser.add_argument('--schedule', type=str, default='auto', choices=['auto', 'manual'], help='Scheduling')
 
-args = parser.parse_args()
+# args = parser.parse_args()
 
-hierarchical_allreduce(args.num_gpus, args.num_nodes, args.instances, args.protocol, args.schedule)
+# hierarchical_allreduce(args.num_gpus, args.num_nodes, args.instances, args.protocol, args.schedule)
+
+hierarchical_allreduce(2, 2, 1, 'Simple', "auto")
+
 

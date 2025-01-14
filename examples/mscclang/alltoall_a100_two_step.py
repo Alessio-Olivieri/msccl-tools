@@ -46,13 +46,15 @@ def alltoall_hierarchical(num_nodes, gpus_per_node, protocol):
 
         XML() # Prints the XML
         Check()
+        Print_instruction_dag()
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('num_nodes', type=int, help ='number of nodes')
-parser.add_argument('gpus_per_node', type=int, help ='gpus per node')
-parser.add_argument('--protocol', type=str, default='Simple', choices=['Simple', 'LL', 'LL128'], help ='NCCL protocol. Default: Simple')
-args = parser.parse_args()
+# parser.add_argument('num_nodes', type=int, help ='number of nodes')
+# parser.add_argument('gpus_per_node', type=int, help ='gpus per node')
+# parser.add_argument('--protocol', type=str, default='Simple', choices=['Simple', 'LL', 'LL128'], help ='NCCL protocol. Default: Simple')
+# args = parser.parse_args()
 
 
-alltoall_hierarchical(args.num_nodes, args.gpus_per_node, args.protocol)
+# alltoall_hierarchical(args.num_nodes, args.gpus_per_node, args.protocol)
+alltoall_hierarchical(2, 2, "Simple")

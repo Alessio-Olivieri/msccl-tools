@@ -78,7 +78,7 @@ def allreduce_swing_all_sends(size, instances):
                 
             
         XML()
-        Print_instruction_dag()
+        Print_instruction_dag("pdf")
         Check()
 
 # parser = argparse.ArgumentParser()

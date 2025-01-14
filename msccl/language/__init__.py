@@ -141,8 +141,9 @@ class MSCCLProgram:
     def print_rank_dag(self):
         visualize_rank_dag(self.instr_dag.operations)
 
-    def print_instruction_dag(self):
-        visualize_instruction_dag(self.instr_dag, self.collective)
+    def print_instruction_dag(self, format):
+        self.instr_dag.convert_set_list() #In case the XML() function was not already called
+        visualize_instruction_dag(format, self.instr_dag, self.collective)
     
     def print_ir(self):
         visualize_instruction_ir(self.lower())
@@ -154,8 +155,8 @@ def Print_rank_dag():
 def Print_chunk_dag():
     _curr().print_chunk_dag()
 
-def Print_instruction_dag():
-    _curr().print_instruction_dag()
+def Print_instruction_dag(format="pdf"):
+    _curr().print_instruction_dag(format)
 
 def Print_ir():
     _curr().print_ir()

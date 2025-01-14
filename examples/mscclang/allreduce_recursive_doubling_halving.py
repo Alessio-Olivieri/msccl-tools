@@ -46,4 +46,4 @@ parser = argparse.ArgumentParser()
 # args = parser.parse_args()
 # allreduce(args.num_gpus, args.instances, args.protocol)
 
-allreduce(4, 1, "LL")
+allreduce(8, 1, "LL")

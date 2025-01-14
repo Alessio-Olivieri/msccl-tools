@@ -31,10 +31,10 @@ def allreduce_ring(size, instances):
             while next != (r - 1) % size:
                 c = c.copy(next, buffer=Buffer.input, index=r)
                 next = (next + 1) % size
-
+        
         Check()
         XML()
-        Print_instruction_dag()
+        Print_instruction_dag(format="pdf")
 
 # parser = argparse.ArgumentParser()
 # parser.add_argument('num_gpus', type=int, help ='number of gpus')

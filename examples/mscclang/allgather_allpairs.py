@@ -34,4 +34,4 @@ def allgather_allpairs(gpus, instances, protocol):
 # args = parser.parse_args()
 
 # allgather_allpairs(args.num_gpus, args.instances, args.protocol)
-allgather_allpairs(4,1, "LL128")
+allgather_allpairs(8,1, "LL128")

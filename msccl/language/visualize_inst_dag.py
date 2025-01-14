@@ -29,7 +29,7 @@ instruction_color_mapping = {
     Instruction.recv_copy_send: "light green",
     }
 
-def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Collective):
+def visualize_instruction_dag(format, instruction_dag: InstructionDAG, collective: Collective):
     edges = []
     vertex_labels = []
     vertex_colors = []
@@ -370,15 +370,15 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
                 chunks_in = infer_read_chunks(op_node)
                 for i, chunk in enumerate(chunks_in):
                     x[chunk] = x[op_node] - 1
-                    y[chunk] = y[op_node] + i / 5
+                    y[chunk] = y[op_node] + i / 3.5
                 added_chunks.append(len(chunks_in))
                 chunks_out = infer_write_chunks(op_node)
                 for i, chunk in enumerate(chunks_out):
                     x[chunk] = x[op_node] + 1
-                    y[chunk] = y[op_node] + i / 5
+                    y[chunk] = y[op_node] + i / 3.5
                 added_chunks.append(len(chunks_out))
 
-            max_y = max(added_chunks) / 5 + 1 
+            max_y = max(added_chunks) / 3.5 + 1 
             current_height += max_y
             # set positions for next op nodes of the ops in this floor
             for op_node in queue:
@@ -445,15 +445,15 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
                 chunks_in = infer_read_chunks(op_node)
                 for i, chunk in enumerate(chunks_in):
                     x[chunk] = x[op_node] - 1
-                    y[chunk] = y[op_node] + i / 5
+                    y[chunk] = y[op_node] + i / 4
                 added_chunks.append(len(chunks_in))
                 chunks_out = infer_write_chunks(op_node)
                 for i, chunk in enumerate(chunks_out):
                     x[chunk] = x[op_node] + 1
-                    y[chunk] = y[op_node] + i / 5
+                    y[chunk] = y[op_node] + i / 4
                 added_chunks.append(len(chunks_out))
 
-            max_y = max(added_chunks) / 5 + 1 
+            max_y = max(added_chunks) / 4 + 1 
             return max_y
 
         x = [-1] * len(g.vs)
@@ -536,10 +536,10 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
         "vertex_color": g.vs["colors"],
         "vertex_label": g.vs["labels"],
         "vertex_shape": g.vs["shapes"],
-        "bbox": (maxx*100, maxy*100)
+        "bbox": (maxx*100+5, maxy*100+5)
         }
         print(maxx*100, maxy*105)
-        ig.plot(g, **style, target="OUT.pdf")
+        ig.plot(g, **style, target=f"OUT.{format}")
 
     
                 
@@ -564,9 +564,9 @@ def visualize_instruction_dag(instruction_dag: InstructionDAG, collective: Colle
             visiting_order.append(op)
             nnodes = connect_generate_chunk(op, nnodes)    
             operations = operations[1:]
-            draw()
 
         else: operations = operations[1:] + [op]
+    draw()
 
     
          
